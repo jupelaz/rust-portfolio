@@ -2,10 +2,10 @@ use yew::prelude::*;
 
 #[function_component(App)]
 fn app() -> Html {
-    let todos = use_state(|| vec!["Aprender Rust".to_string(), "Hacer una app Yew".to_string()]);
+    let todos = use_state(|| vec!["Learn Rust".to_string(), "Build a web with Yew".to_string()]);
     html! {
         <div>
-            <h1>{ "Lista de tareas" }</h1>
+            <h1>{ "Task list" }</h1>
             <ul>
                 { for todos.iter().map(|item| html!{ <li>{ item }</li> }) }
             </ul>

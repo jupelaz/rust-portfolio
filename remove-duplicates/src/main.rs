@@ -20,7 +20,7 @@ async fn upload_file(mut payload: Multipart, tmpl: web::Data<Environment<'_>>) -
                 None => "".to_string(),
             };
         if !filename.ends_with(".txt") {
-            return HttpResponse::BadRequest().body("Solo se permiten archivos .txt");
+            return HttpResponse::BadRequest().body("Only .txt files are allowed");
         }
 
         let mut content = Vec::new();
@@ -28,10 +28,10 @@ async fn upload_file(mut payload: Multipart, tmpl: web::Data<Environment<'_>>) -
         while let Some(chunk) = field.next().await {
             let data = match chunk {
                 Ok(d) => d,
-                Err(_) => return HttpResponse::BadRequest().body("Error leyendo archivo"),
+                Err(_) => return HttpResponse::BadRequest().body("Error reading file"),
             };
             if content.len() + data.len() > MAX_FILE_SIZE {
-                return HttpResponse::BadRequest().body("Archivo demasiado grande");
+                return HttpResponse::BadRequest().body("File too large");
             }
             content.extend_from_slice(&data);
         }
@@ -57,7 +57,7 @@ async fn upload_file(mut payload: Multipart, tmpl: web::Data<Environment<'_>>) -
             .body(html);
     }
 
-    HttpResponse::BadRequest().body("No se recibió archivo")
+    HttpResponse::BadRequest().body("No file received")
 }
 
 async fn download(form: web::Form<std::collections::HashMap<String, String>>) -> impl Responder {
@@ -67,14 +67,14 @@ async fn download(form: web::Form<std::collections::HashMap<String, String>>) ->
             .body(content.clone());
     }
 
-    HttpResponse::BadRequest().body("No se pudo descargar")
+    HttpResponse::BadRequest().body("Download failed")
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("🚀 Servidor en http://0.0.0.0:8080");
+    println!("🚀 Server in http://127.0.0.1:8080");
 
-    // Motor de plantillas Minijinja
+    // Minijinja template engine
     let mut env = Environment::new();
     env.set_loader(minijinja::path_loader("templates"));
 
