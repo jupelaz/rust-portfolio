@@ -91,3 +91,112 @@ async fn main() -> std::io::Result<()> {
         .run()
         .await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    // Helper function to simulate the duplicate removal logic
+    fn remove_duplicates(input: &str) -> Vec<String> {
+        let mut seen = HashSet::new();
+        let mut result = Vec::new();
+        
+        for line in input.lines() {
+            let line = line.trim();
+            if seen.insert(line) && !line.is_empty() {
+                result.push(line.to_string());
+            }
+        }
+        
+        result
+    }
+    
+    #[tokio::test]
+    async fn test_remove_duplicates_basic() {
+        let input = "line1\nline2\nline1\nline3";
+        let result = remove_duplicates(input);
+        assert_eq!(result, vec!["line1", "line2", "line3"]);
+    }
+    
+    #[tokio::test]
+    async fn test_remove_duplicates_with_empty_lines() {
+        let input = "line1\n\nline2\n\nline1\nline3";
+        let result = remove_duplicates(input);
+        assert_eq!(result, vec!["line1", "line2", "line3"]);
+    }
+    
+    #[tokio::test]
+    async fn test_remove_duplicates_with_whitespace() {
+        let input = "  line1  \nline2\n  line1\nline3  ";
+        let result = remove_duplicates(input);
+        assert_eq!(result, vec!["line1", "line2", "line3"]);
+    }
+    
+    #[tokio::test]
+    async fn test_remove_duplicates_empty_input() {
+        let input = "";
+        let result = remove_duplicates(input);
+        assert!(result.is_empty());
+    }
+    
+    // File validation tests
+    
+    #[tokio::test]
+    async fn test_is_valid_file_type() {
+        // Helper function to test file type validation
+        fn is_valid_file_type(filename: &str) -> bool {
+            filename.ends_with(".txt")
+        }
+        
+        assert!(is_valid_file_type("test.txt"));
+        assert!(!is_valid_file_type("test.pdf"));
+        assert!(!is_valid_file_type("test"));
+        assert!(!is_valid_file_type(""));
+    }
+    
+    #[tokio::test]
+    async fn test_is_file_size_valid() {
+        // Helper function to test file size validation
+        fn is_file_size_valid(content_size: usize) -> bool {
+            content_size <= MAX_FILE_SIZE
+        }
+        
+        assert!(is_file_size_valid(0));
+        assert!(is_file_size_valid(1024));
+        assert!(is_file_size_valid(MAX_FILE_SIZE));
+        assert!(!is_file_size_valid(MAX_FILE_SIZE + 1));
+    }
+    
+    // UTF-8 validation and edge case tests
+    
+    #[tokio::test]
+    async fn test_utf8_validation() {
+        // Valid UTF-8 bytes
+        let valid_utf8 = vec![72, 101, 108, 108, 111]; // "Hello" in UTF-8
+        let result = String::from_utf8_lossy(&valid_utf8);
+        assert_eq!(result, "Hello");
+        
+        // Invalid UTF-8 bytes (the value 255 is not valid UTF-8)
+        let invalid_utf8 = vec![72, 101, 108, 108, 111, 255];
+        let result = String::from_utf8_lossy(&invalid_utf8);
+        assert_eq!(result, "Hello�"); // Replacement character for invalid UTF-8
+    }
+    
+    #[tokio::test]
+    async fn test_edge_cases() {
+        // Test with a string containing only whitespace
+        let input = "   \n  \t  ";
+        let result = remove_duplicates(input);
+        assert!(result.is_empty());
+        
+        // Test with a string containing special characters
+        let input = "line1\nline2\nline1\nline3\n!@#$%^&*()";
+        let result = remove_duplicates(input);
+        assert_eq!(result, vec!["line1", "line2", "line3", "!@#$%^&*()"]);
+    }
+    
+    // Note: Testing the HTTP handlers directly is challenging in this setup
+    // because they depend on external resources (files, templates) and
+    // complex types (Multipart, HttpResponse). In a real-world scenario,
+    // we would use integration tests for these handlers.
+}

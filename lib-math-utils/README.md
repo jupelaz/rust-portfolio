@@ -23,3 +23,17 @@ fn main() {
     println!("LCM of 12 and 18: {}", mcm(12, 18));
 }
 ```
+
+## Testing
+
+The library includes comprehensive unit tests for both functions. The tests cover:
+
+- Basic functionality with various inputs
+- Edge cases (zeros, identical numbers)
+- Special cases (coprime numbers, numbers with common divisors)
+
+To run the tests:
+
+```bash
+cargo test
+```
